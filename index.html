@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkedIn Warrior — AI Profile Consultant</title>
+  <meta name="description" content="AI-powered LinkedIn profile review, content plan, and professional images. Built at GDG Newport Beach Google I/O Extended Hackathon 2026." />
+
+  <!-- Google Fonts: Space Grotesk (display) + Inter (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Tokens ─────────────────────────────────────────────────── */
+    :root {
+      --black:     #0a0a0f;
+      --surface:   #13131a;
+      --card:      #1a1a24;
+      --border:    #2a2a38;
+      --border-hi: #3a3a50;
+
+      --google-blue:   #4285F4;
+      --google-red:    #EA4335;
+      --google-yellow: #FBBC05;
+      --google-green:  #34A853;
+
+      --accent:    #4285F4;
+      --accent-lo: rgba(66,133,244,0.12);
+      --warn:      #FBBC05;
+      --warn-lo:   rgba(251,188,5,0.12);
+      --danger:    #EA4335;
+      --success:   #34A853;
+
+      --text-primary:   #f0f0f5;
+      --text-secondary: #9090a8;
+      --text-muted:     #60607a;
+
+      --font-display: 'Space Grotesk', system-ui, sans-serif;
+      --font-body:    'Inter', system-ui, sans-serif;
+
+      --radius-sm:  6px;
+      --radius-md:  12px;
+      --radius-lg:  20px;
+
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    /* ── Reset ──────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--black);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    button { font-family: var(--font-body); cursor: pointer; border: none; }
+    input, textarea {
+      font-family: var(--font-body);
+      outline: none;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────────── */
+    .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+    .section { padding: 60px 0; }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+      position: sticky;
+      top: 0;
+      background: rgba(10,10,15,0.95);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+    header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--google-blue);
+      box-shadow: 0 0 8px var(--google-blue);
+    }
+    .header-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 3px 10px;
+    }
+
+    /* ── Hero ───────────────────────────────────────────────────── */
+    #hero {
+      padding: 100px 0 80px;
+      text-align: center;
+    }
+    .gdg-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 5px 14px;
+      margin-bottom: 28px;
+    }
+    .gdg-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+    .gdg-dot.blue   { background: var(--google-blue); }
+    .gdg-dot.red    { background: var(--google-red); }
+    .gdg-dot.yellow { background: var(--google-yellow); }
+    .gdg-dot.green  { background: var(--google-green); }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+    }
+    h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--google-blue) 0%, var(--google-green) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto 48px;
+      line-height: 1.7;
+    }
+
+    /* ── Input ──────────────────────────────────────────────────── */
+    .input-wrap {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .url-input {
+      flex: 1;
+      min-width: 280px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      transition: border-color 0.2s;
+    }
+    .url-input::placeholder { color: var(--text-muted); }
+    .url-input:focus { border-color: var(--accent); }
+    .url-input.error { border-color: var(--danger); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-radius: var(--radius-md);
+      padding: 14px 24px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-secondary {
+      background: var(--card);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 18px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-secondary:hover {
+      border-color: var(--border-hi);
+      color: var(--text-primary);
+    }
+
+    .input-error {
+      color: var(--danger);
+      font-size: 0.8rem;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    /* ── Progress bar ───────────────────────────────────────────── */
+    #progress-section {
+      display: none;
+      max-width: 600px;
+      margin: 32px auto 0;
+    }
+    #progress-section.visible { display: block; }
+    .progress-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .progress-bar-track {
+      height: 4px;
+      background: var(--card);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--google-blue), var(--google-green));
+      border-radius: 100px;
+      transition: width 0.6s ease;
+      width: 0%;
+    }
+    .progress-steps {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .step-chip {
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 100px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .step-chip.active {
+      background: var(--accent-lo);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .step-chip.done {
+      background: rgba(52,168,83,0.1);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    /* ── Settings panel ─────────────────────────────────────────── */
+    #settings-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    #settings-toggle:hover { color: var(--text-primary); border-color: var(--border-hi); }
+    #settings-panel {
+      display: none;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      max-width: 600px;
+      margin: 16px auto 0;
+    }
+    #settings-panel.visible { display: block; }
+    .settings-row { margin-bottom: 14px; }
+    .settings-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .settings-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 0.875rem;
+      color: var(--text-primary);
+    }
+    .settings-help {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .settings-help a { color: var(--accent); }
+
+    /* ── Dashboard sections ─────────────────────────────────────── */
+    #dashboard { display: none; }
+    #dashboard.visible { display: block; }
+
+    .dash-header {
+      border-bottom: 1px solid var(--border);
+      padding: 24px 0;
+      margin-bottom: 0;
+    }
+    .dash-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .dash-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    /* Score ring */
+    .score-ring-wrap {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+    .score-ring {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      flex-shrink: 0;
+    }
+    .score-ring svg { transform: rotate(-90deg); }
+    .score-number {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    .score-label { font-size: 0.6rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; }
+    .score-summary { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; max-width: 420px; }
+
+    /* Section header */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 28px 0 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .section-icon {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .section-count {
+      margin-left: auto;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 2px 10px;
+    }
+
+    /* Profile section items */
+    .profile-sections { display: flex; flex-direction: column; gap: 8px; }
+    .profile-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .profile-item-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .profile-item-header:hover { background: rgba(255,255,255,0.02); }
+    .item-name {
+      font-weight: 500;
+      font-size: 0.9rem;
+      flex: 1;
+      text-transform: capitalize;
+    }
+    .score-bar {
+      width: 80px;
+      height: 4px;
+      background: var(--surface);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .score-bar-fill { height: 100%; border-radius: 100px; }
+    .score-val {
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: var(--font-display);
+      width: 40px;
+      text-align: right;
+    }
+    .score-status { font-size: 1rem; }
+    .item-body {
+      display: none;
+      padding: 0 18px 18px;
+      border-top: 1px solid var(--border);
+    }
+    .item-body.open { display: block; padding-top: 14px; }
+    .item-feedback {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      line-height: 1.7;
+    }
+    .item-recs { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .item-recs li {
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      padding: 8px 12px;
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--accent);
+      line-height: 1.5;
+    }
+
+    /* Top fixes */
+    .top-fixes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .fix-card {
+      background: rgba(251,188,5,0.06);
+      border: 1px solid rgba(251,188,5,0.2);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .fix-num {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--warn);
+      font-size: 1rem;
+      line-height: 1;
+      padding-top: 2px;
+    }
+
+    /* Content posts */
+    .posts-list { display: flex; flex-direction: column; gap: 16px; }
+    .post-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .post-card-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .post-num {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      width: 20px;
+    }
+    .post-type-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 8px;
+      border-radius: 100px;
+    }
+    .type-event    { background: rgba(66,133,244,0.15); color: var(--google-blue); }
+    .type-project  { background: rgba(52,168,83,0.15);  color: var(--google-green); }
+    .type-story    { background: rgba(234,67,53,0.15);  color: var(--google-red); }
+    .type-insight  { background: rgba(251,188,5,0.15);  color: var(--google-yellow); }
+    .type-engagement { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+
+    .post-title { font-weight: 600; font-size: 0.875rem; flex: 1; }
+    .post-schedule {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+    .post-body {
+      padding: 18px;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      line-height: 1.75;
+    }
+    .post-footer {
+      padding: 12px 18px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .hashtag-chip {
+      font-size: 0.7rem;
+      color: var(--accent);
+      background: var(--accent-lo);
+      border-radius: 100px;
+      padding: 3px 8px;
+    }
+    .copy-btn {
+      margin-left: auto;
+      background: var(--accent-lo);
+      color: var(--accent);
+      border: 1px solid rgba(66,133,244,0.3);
+      border-radius: var(--radius-sm);
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover { background: rgba(66,133,244,0.2); }
+    .copy-btn.copied {
+      background: rgba(52,168,83,0.15);
+      color: var(--success);
+      border-color: rgba(52,168,83,0.3);
+    }
+
+    /* GitHub prompt */
+    #github-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin: 24px 0;
+      display: none;
+    }
+    #github-section.visible { display: block; }
+    .gh-header {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .gh-sub { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 18px; }
+    .gh-input-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .gh-input {
+      flex: 1;
+      min-width: 220px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 0.875rem;
+      color: var(--text-primary);
+    }
+    .gh-input:focus { border-color: var(--accent); }
+    .gh-skip {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      text-decoration: underline;
+      display: block;
+      margin-top: 10px;
+    }
+    .gh-token-details {
+      margin-top: 14px;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+    }
+    summary {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    summary:hover { color: var(--text-secondary); }
+    .token-steps {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin: 10px 0;
+      line-height: 1.8;
+    }
+
+    /* Images section */
+    .images-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 600px) { .images-grid { grid-template-columns: 1fr 1fr; } }
+    .image-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .image-placeholder {
+      aspect-ratio: 1;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .image-placeholder svg { opacity: 0.3; }
+    .prompt-text {
+      padding: 10px 12px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      border-top: 1px solid var(--border);
+    }
+    .image-actions {
+      padding: 10px 12px;
+      display: flex;
+      gap: 8px;
+    }
+    .img-copy-btn {
+      flex: 1;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      padding: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .img-copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Empty/error states */
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state p { font-size: 0.875rem; }
+
+    .error-banner {
+      background: rgba(234,67,53,0.08);
+      border: 1px solid rgba(234,67,53,0.25);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: 0.875rem;
+      color: var(--danger);
+      margin: 12px 0;
+    }
+
+    .info-banner {
+      background: var(--accent-lo);
+      border: 1px solid rgba(66,133,244,0.2);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin: 12px 0;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .gdg-colors { display: inline-flex; gap: 3px; margin-left: 4px; }
+    .gc { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+
+    /* Shimmer */
+    @keyframes shimmer {
+      0%   { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+    .shimmer {
+      background: linear-gradient(90deg, var(--card) 25%, var(--surface) 50%, var(--card) 75%);
+      background-size: 800px 100%;
+      animation: shimmer 1.6s infinite linear;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Skeleton cards */
+    .skeleton-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      margin-bottom: 10px;
+    }
+    .skeleton-line { height: 12px; border-radius: 6px; margin-bottom: 8px; }
+    .skeleton-line.short { width: 40%; }
+    .skeleton-line.medium { width: 70%; }
+    .skeleton-line.full { width: 100%; }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 2rem; }
+      .section { padding: 40px 0; }
+      #hero { padding: 60px 0 40px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ──────────────────────────────────────────────────────── -->
+  <header>
+    <div class="container">
+      <div class="logo">
+        <div class="logo-dot"></div>
+        LinkedIn Warrior
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button id="settings-toggle">⚙ Settings</button>
+        <span class="header-badge">GDG Newport Beach · June 20, 2026</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Hero / Input ─────────────────────────────────────────────────── -->
+  <section id="hero">
+    <div class="container">
+      <div class="gdg-pill">
+        <span class="gdg-dot blue"></span>
+        <span class="gdg-dot red"></span>
+        <span class="gdg-dot yellow"></span>
+        <span class="gdg-dot green"></span>
+        Built at Google I/O Extended Hackathon 2026
+      </div>
+
+      <h1>Your LinkedIn profile,<br /><em>actually good</em></h1>
+
+      <p class="hero-sub">
+        Paste your LinkedIn URL. Get a full AI profile audit, a ready-to-post content plan,
+        and a GDG Newport Beach hackathon badge in seconds.
+      </p>
+
+      <div class="input-wrap">
+        <input
+          id="linkedin-url"
+          class="url-input"
+          type="url"
+          placeholder="https://www.linkedin.com/in/yourname"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button class="btn-primary" id="analyze-btn" onclick="startAnalysis()">
+          Analyze my profile →
+        </button>
+      </div>
+      <div id="url-error" class="input-error" style="display:none;"></div>
+
+      <!-- Settings panel -->
+      <div id="settings-panel">
+        <div class="settings-row">
+          <div class="settings-label">Gemini API Key (client-side mode)</div>
+          <input id="gemini-key-input" class="settings-input" type="password" placeholder="AIzaSy..." />
+          <div class="settings-help">
+            Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a>.
+            Used only in your browser — never stored on a server.
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-label">Cloud Shell API URL (server mode)</div>
+          <input id="api-base-input" class="settings-input" type="url" placeholder="https://8080-cs-xxxx.cs.us-central1.cloudshell.dev" />
+          <div class="settings-help">
+            Leave blank to use client-side mode. Set this to your Cloud Shell Web Preview URL for demo day.
+          </div>
+        </div>
+        <button class="btn-primary" onclick="saveSettings()" style="margin-top:8px;">Save settings</button>
+      </div>
+
+      <!-- Progress -->
+      <div id="progress-section">
+        <div class="progress-label">
+          <span id="progress-text">Initializing…</span>
+          <span id="progress-pct">0%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-steps">
+          <span class="step-chip" id="chip-fetch">Fetching profile</span>
+          <span class="step-chip" id="chip-analyze">Analyzing</span>
+          <span class="step-chip" id="chip-content">Content plan</span>
+          <span class="step-chip" id="chip-images">Image prompts</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Dashboard ────────────────────────────────────────────────────── -->
+  <div id="dashboard">
+    <div class="container">
+
+      <div class="dash-header">
+        <div class="dash-meta" id="dash-meta">Analyzed · June 20, 2026</div>
+        <div class="dash-title" id="dash-title">Your LinkedIn AI Report</div>
+      </div>
+
+      <!-- ── Section 1: Profile Review ─────────────────────────────── -->
+      <div>
+        <div class="section-header">
+          <div class="section-icon" style="background:var(--accent-lo);">🎯</div>
+          <div class="section-title">Profile Review</div>
+          <div class="section-count" id="review-score-pill">–/100</div>
+        </div>
+
+        <div class="score-ring-wrap">
+          <div class="score-ring">
+            <svg viewBox="0 0 100 100" width="100" height="100">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="var(--border)" stroke-width="8"/>
+              <circle id="score-circle" cx="50" cy="50" r="42" fill="none"
+                stroke="var(--google-blue)" stroke-width="8"
+                stroke-dasharray="264" stroke-dashoffset="264"
+                stroke-linecap="round"
+                style="transition: stroke-dashoffset 1s ease"/>
+            </svg>
+            <div class="score-number">
+              <span id="score-val">–</span>
+              <span class="score-label">/ 100</span>
+            </div>
+          </div>
+          <div class="score-summary" id="score-summary">Running analysis…</div>
+        </div>
+
+        <div id="top-fixes" class="top-fixes" style="margin-top:20px;"></div>
+        <div class="profile-sections" id="profile-sections"></div>
+        <div id="review-error" class="error-banner" style="display:none;"></div>
+      </div>
+
+      <!-- ── GitHub prompt ──────────────────────────────────────────── -->
+      <div id="github-section">
+        <div class="gh-header">🔗 Want a richer content plan?</div>
+        <div class="gh-sub">
+          Add your GitHub profile to generate posts that show off your actual projects and code.
+        </div>
+        <div class="gh-input-row">
+          <input id="github-url" class="gh-input" type="url" placeholder="https://github.com/yourname" />
+          <input id="github-token" class="gh-input" type="password" placeholder="Personal access token (optional)" style="max-width:260px;" />
+          <button class="btn-primary" onclick="addGitHub()">Add GitHub →</button>
+        </div>
+        <button class="gh-skip" onclick="skipGitHub()">Skip — use LinkedIn data only</button>
+        <details class="gh-token-details">
+          <summary>How to get a GitHub access token (takes 60 seconds)</summary>
+          <div class="token-steps">
+            1. Go to github.com → Settings → Developer settings → Personal access tokens<br/>
+            2. Click "Generate new token (classic)"<br/>
+            3. Select scopes: <code>read:user</code>, <code>public_repo</code><br/>
+            4. Copy the token and paste it above<br/><br/>
+            Your token is used only for this session and never stored.
+          </div>
+        </details>
+        <div id="gh-error" class="error-banner" style="display:none;"></div>
+      </div>
+
+      <!-- ── Section 2: Content Plan ────────────────────────────────── -->
+      <div id="content-section">
+        <div class="section-header">
+          <div class="section-icon" style="background:rgba(52,168,83,0.1);">✍️</div>
+          <div class="section-title">Content Plan</div>
+          <div class="section-count" id="post-count-pill">5 posts</div>
+        </div>
+        <div id="posts-list" class="posts-list">
+          <div id="content-loading">
+            <div class="skeleton-card shimmer"><div class="skeleton-line short shimmer"></div><div class="skeleton-line full shimmer"></div></div>
+            <div class="skeleton-card shimmer"><div class="skeleton-line short shimmer"></div><div class="skeleton-line medium shimmer"></div></div>
+          </div>
+        </div>
+        <div id="content-error" class="error-banner" style="display:none;"></div>
+      </div>
+
+      <!-- ── Section 3: Image Prompts ───────────────────────────────── -->
+      <div id="images-section">
+        <div class="section-header">
+          <div class="section-icon" style="background:rgba(251,188,5,0.1);">🖼</div>
+          <div class="section-title">AI Image Prompts</div>
+          <div class="section-count">3 prompts</div>
+        </div>
+
+        <div class="info-banner">
+          These are engineered prompts for <strong>Nano Banana Pro</strong> or any image generation tool.
+          Copy a prompt and paste it into your preferred image generator.
+        </div>
+
+        <div class="images-grid" id="image-prompts-grid">
+          <div class="skeleton-card shimmer" style="height:200px;"></div>
+          <div class="skeleton-card shimmer" style="height:200px;"></div>
+          <div class="skeleton-card shimmer" style="height:200px;"></div>
+        </div>
+        <div id="images-error" class="error-banner" style="display:none;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Footer ───────────────────────────────────────────────────────── -->
+  <footer>
+    <div class="container">
+      Built at <strong>GDG Newport Beach</strong> · Google I/O Extended Lab &amp; Hackathon · June 20, 2026
+      <span class="gdg-colors">
+        <span class="gc" style="background:#4285F4"></span>
+        <span class="gc" style="background:#EA4335"></span>
+        <span class="gc" style="background:#FBBC05"></span>
+        <span class="gc" style="background:#34A853"></span>
+      </span>
+      <br/>
+      <span style="color:var(--text-muted);font-size:0.75rem;">
+        Powered by Gemini · GitHub Pages · LinkedIn Warrior v1.0
+      </span>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { callGemini, analyzeLinkedIn, generateContentPlan, generateImagePrompt, getGeminiKey } from './src/gemini.js';
+    import { fetchGitHubProfile, parseGitHubUsername } from './src/github.js';
+    import { saveSession, loadSession, updateSession, setGithubToken, getGithubToken } from './src/storage.js';
+    import { getApiBase, setApiBase, apiPost } from './src/config.js';
+
+    // ── Globals ─────────────────────────────────────────────────────────
+    let linkedinUrl = '';
+    let profileText = '';
+    let reviewData = null;
+    let githubData = null;
+
+    // ── Init ─────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      // Restore settings
+      const savedKey = localStorage.getItem('gemini_key') || '';
+      const savedBase = localStorage.getItem('api_base') || '';
+      if (savedKey) document.getElementById('gemini-key-input').value = savedKey;
+      if (savedBase) document.getElementById('api-base-input').value = savedBase;
+
+      // Pre-fill URL from query param: ?url=...
+      const urlParam = new URLSearchParams(location.search).get('url');
+      if (urlParam) {
+        document.getElementById('linkedin-url').value = urlParam;
+      }
+
+      // Settings toggle
+      document.getElementById('settings-toggle').addEventListener('click', () => {
+        document.getElementById('settings-panel').classList.toggle('visible');
+      });
+
+      // Restore session
+      const session = loadSession();
+      if (session?.review) {
+        linkedinUrl = session.linkedinUrl || '';
+        profileText = session.profileText || '';
+        reviewData = session.review;
+        githubData = session.github || null;
+        document.getElementById('linkedin-url').value = linkedinUrl;
+        showDashboard();
+        renderReview(reviewData);
+        if (session.contentPlan) renderContentPlan(session.contentPlan);
+        if (session.imagePrompts) renderImagePrompts(session.imagePrompts);
+      }
+    });
+
+    // ── Settings ─────────────────────────────────────────────────────────
+    window.saveSettings = function () {
+      const key = document.getElementById('gemini-key-input').value.trim();
+      const base = document.getElementById('api-base-input').value.trim();
+      if (key) localStorage.setItem('gemini_key', key);
+      if (base) localStorage.setItem('api_base', base.replace(/\/$/, ''));
+      else localStorage.removeItem('api_base');
+      document.getElementById('settings-panel').classList.remove('visible');
+    };
+
+    // ── Validate LinkedIn URL ────────────────────────────────────────────
+    function validateLinkedIn(url) {
+      if (!url) return 'Please paste your LinkedIn profile URL';
+      if (url.includes('github.com')) return 'That looks like a GitHub URL — LinkedIn goes here';
+      const normalized = url.includes('://') ? url : 'https://' + url;
+      if (!normalized.includes('linkedin.com/in/')) return "That doesn't look like a LinkedIn URL";
+      return null;
+    }
+
+    function normalizeLinkedIn(url) {
+      let u = url.trim();
+      if (!u.includes('://')) u = 'https://' + u;
+      return u.replace(/\/$/, '');
+    }
+
+    // ── Progress helpers ──────────────────────────────────────────────────
+    function setProgress(pct, label, step) {
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('progress-pct').textContent = pct + '%';
+      document.getElementById('progress-text').textContent = label;
+      ['fetch','analyze','content','images'].forEach(s => {
+        const chip = document.getElementById('chip-' + s);
+        if (chip) {
+          chip.className = 'step-chip';
+          if (s === step) chip.classList.add('active');
+          else if (['fetch','analyze','content','images'].indexOf(s) < ['fetch','analyze','content','images'].indexOf(step)) {
+            chip.classList.add('done');
+          }
+        }
+      });
+    }
+
+    function markChipDone(step) {
+      const chip = document.getElementById('chip-' + step);
+      if (chip) { chip.className = 'step-chip done'; }
+    }
+
+    // ── Main analysis flow ───────────────────────────────────────────────
+    window.startAnalysis = async function () {
+      const rawUrl = document.getElementById('linkedin-url').value;
+      const errMsg = validateLinkedIn(rawUrl);
+
+      const errEl = document.getElementById('url-error');
+      const urlInput = document.getElementById('linkedin-url');
+      if (errMsg) {
+        errEl.textContent = errMsg;
+        errEl.style.display = 'block';
+        urlInput.classList.add('error');
+        return;
+      }
+      errEl.style.display = 'none';
+      urlInput.classList.remove('error');
+
+      linkedinUrl = normalizeLinkedIn(rawUrl);
+      profileText = ''; // Would be set by a paste flow in production
+
+      const btn = document.getElementById('analyze-btn');
+      btn.disabled = true;
+      btn.textContent = 'Analyzing…';
+
+      document.getElementById('progress-section').classList.add('visible');
+      setProgress(5, 'Fetching your LinkedIn profile…', 'fetch');
+
+      // Check if we have a key or API base
+      const apiBase = getApiBase();
+      const geminiKey = getGeminiKey();
+      if (!apiBase && !geminiKey) {
+        errEl.textContent = 'Please add a Gemini API key in Settings first.';
+        errEl.style.display = 'block';
+        document.getElementById('settings-panel').classList.add('visible');
+        btn.disabled = false;
+        btn.textContent = 'Analyze my profile →';
+        document.getElementById('progress-section').classList.remove('visible');
+        return;
+      }
+
+      showDashboard();
+      window.scrollTo({ top: document.getElementById('dashboard').offsetTop - 80, behavior: 'smooth' });
+
+      // Step 1: "Fetch" (we simulate since real LinkedIn scraping needs backend)
+      await delay(800);
+      setProgress(20, 'Analyzing your profile…', 'analyze');
+      markChipDone('fetch');
+
+      // Step 2: Analyze
+      try {
+        let review;
+        if (apiBase) {
+          review = await apiPost('/api/analyze', { linkedin_url: linkedinUrl, linkedin_text: profileText });
+        } else {
+          review = await analyzeLinkedIn(linkedinUrl, profileText);
+        }
+        reviewData = review;
+        setProgress(50, 'Analysis complete — generating content plan…', 'content');
+        markChipDone('analyze');
+        renderReview(review);
+        updateSession({ linkedinUrl, profileText, review });
+
+        // Show GitHub prompt
+        document.getElementById('github-section').classList.add('visible');
+
+        // Step 3: Content plan (with current github data, even if null)
+        await runContentPlan(apiBase);
+        markChipDone('content');
+
+        // Step 4: Image prompts
+        setProgress(85, 'Generating image prompts…', 'images');
+        await runImagePrompts(apiBase);
+        markChipDone('images');
+
+        setProgress(100, '✅ Done!', '');
+        setTimeout(() => {
+          document.getElementById('progress-section').classList.remove('visible');
+        }, 2000);
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('review-error').textContent = 'Analysis failed: ' + err.message;
+        document.getElementById('review-error').style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Analyze my profile →';
+      }
+    };
+
+    async function runContentPlan(apiBase) {
+      document.getElementById('content-loading').style.display = 'block';
+      document.getElementById('posts-list').innerHTML = '';
+      const loadingEl = buildSkeletonPosts();
+      document.getElementById('posts-list').appendChild(loadingEl);
+
+      try {
+        let plan;
+        if (apiBase) {
+          plan = await apiPost('/api/content-plan', {
+            linkedin_url: linkedinUrl,
+            linkedin_text: profileText,
+            github_username: githubData?.username || '',
+            github_data: githubData || {},
+          });
+        } else {
+          plan = await generateContentPlan(linkedinUrl, profileText, githubData);
+        }
+        renderContentPlan(plan);
+        updateSession({ contentPlan: plan });
+      } catch (err) {
+        document.getElementById('content-error').textContent = 'Content plan failed: ' + err.message;
+        document.getElementById('content-error').style.display = 'block';
+        document.getElementById('posts-list').innerHTML = '';
+      }
+    }
+
+    async function runImagePrompts(apiBase) {
+      const name = reviewData?.name || '';
+      const role = reviewData?.sections?.headline?.feedback?.split(' ')?.[0] || 'professional';
+
+      const styles = [
+        { label: '4K Professional Headshot', style: 'professional headshot' },
+        { label: 'Tech Leader Portrait', style: 'tech industry executive portrait' },
+        { label: 'GDG Hackathon Badge', style: 'gdg-badge' },
+      ];
+
+      const results = [];
+      for (const s of styles) {
+        try {
+          let prompt;
+          if (apiBase) {
+            const res = await apiPost('/api/image-prompt', {
+              linkedin_text: profileText,
+              name, role, style: s.style,
+            });
+            prompt = res.prompt;
+          } else {
+            prompt = await generateImagePrompt(name, role, profileText, s.style);
+          }
+          results.push({ label: s.label, prompt });
+        } catch (err) {
+          results.push({ label: s.label, prompt: 'Prompt generation failed: ' + err.message, error: true });
+        }
+      }
+      renderImagePrompts(results);
+      updateSession({ imagePrompts: results });
+    }
+
+    // ── GitHub flow ──────────────────────────────────────────────────────
+    window.addGitHub = async function () {
+      const ghUrl = document.getElementById('github-url').value.trim();
+      const ghToken = document.getElementById('github-token').value.trim();
+      const errEl = document.getElementById('gh-error');
+
+      if (!ghUrl) { errEl.textContent = 'Please enter a GitHub URL.'; errEl.style.display = 'block'; return; }
+      if (ghUrl.includes('linkedin.com')) { errEl.textContent = "That's a LinkedIn URL — we already have it!"; errEl.style.display = 'block'; return; }
+      if (!ghUrl.includes('github.com') && !/^[a-zA-Z0-9_-]+$/.test(ghUrl)) {
+        errEl.textContent = "That doesn't look like a GitHub profile URL."; errEl.style.display = 'block'; return;
+      }
+      errEl.style.display = 'none';
+
+      if (ghToken) setGithubToken(ghToken);
+
+      try {
+        githubData = await fetchGitHubProfile(ghUrl, ghToken || null);
+        document.getElementById('github-section').classList.remove('visible');
+        // Re-run content plan with GitHub data
+        const apiBase = getApiBase();
+        await runContentPlan(apiBase);
+        updateSession({ github: githubData });
+      } catch (err) {
+        errEl.textContent = err.message + ' Continuing in LinkedIn-only mode.';
+        errEl.style.display = 'block';
+        setTimeout(() => skipGitHub(), 3000);
+      }
+    };
+
+    window.skipGitHub = function () {
+      document.getElementById('github-section').classList.remove('visible');
+    };
+
+    // ── Render: Review ───────────────────────────────────────────────────
+    function renderReview(review) {
+      document.getElementById('review-score-pill').textContent = (review.overall_score || 0) + '/100';
+      document.getElementById('score-val').textContent = review.overall_score || '–';
+      document.getElementById('score-summary').textContent = review.summary || '';
+      document.getElementById('dash-title').textContent = 'Your LinkedIn AI Report';
+      document.getElementById('dash-meta').textContent =
+        'Analyzed ' + linkedinUrl + ' · June 20, 2026';
+
+      // Score ring
+      const score = review.overall_score || 0;
+      const circumference = 264;
+      const offset = circumference - (score / 100) * circumference;
+      const circle = document.getElementById('score-circle');
+      circle.style.strokeDashoffset = offset;
+      circle.style.stroke = score >= 80 ? '#34A853' : score >= 50 ? '#4285F4' : '#EA4335';
+
+      // Top improvements
+      const fixes = review.top_improvements || [];
+      const fixesEl = document.getElementById('top-fixes');
+      fixesEl.innerHTML = fixes.map((f, i) => `
+        <div class="fix-card">
+          <span class="fix-num">${i + 1}</span>
+          <span>${f}</span>
+        </div>
+      `).join('');
+
+      // Section accordion
+      const sections = review.sections || {};
+      const sectionsEl = document.getElementById('profile-sections');
+      sectionsEl.innerHTML = '';
+
+      const sectionNames = ['headline','about','experience','skills','education','profile_photo','certifications','recommendations','activity'];
+      sectionNames.forEach(key => {
+        const s = sections[key];
+        if (!s) return;
+        const score = s.score || 0;
+        const color = score >= 80 ? '#34A853' : score >= 50 ? '#FBBC05' : '#EA4335';
+        const icon = score >= 80 ? '✅' : score >= 50 ? '⚠️' : '🔴';
+        const label = key.replace(/_/g, ' ');
+
+        const item = document.createElement('div');
+        item.className = 'profile-item';
+        item.innerHTML = `
+          <div class="profile-item-header" onclick="this.nextElementSibling.classList.toggle('open')">
+            <span class="score-status">${icon}</span>
+            <span class="item-name">${label}</span>
+            <div class="score-bar"><div class="score-bar-fill" style="width:${score}%;background:${color};"></div></div>
+            <span class="score-val" style="color:${color};">${score}</span>
+          </div>
+          <div class="item-body">
+            <p class="item-feedback">${s.feedback || ''}</p>
+            <ul class="item-recs">
+              ${(s.recommendations || []).map(r => `<li>${r}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+        sectionsEl.appendChild(item);
+      });
+    }
+
+    // ── Render: Content Plan ─────────────────────────────────────────────
+    function renderContentPlan(plan) {
+      const postsEl = document.getElementById('posts-list');
+      postsEl.innerHTML = '';
+      const posts = plan.posts || [];
+      document.getElementById('post-count-pill').textContent = posts.length + ' posts';
+
+      posts.forEach(p => {
+        const typeClass = 'type-' + (p.type || 'insight');
+        const card = document.createElement('div');
+        card.className = 'post-card';
+        card.innerHTML = `
+          <div class="post-card-header">
+            <span class="post-num">${p.post_number || ''}</span>
+            <span class="post-type-badge ${typeClass}">${p.type || 'post'}</span>
+            <span class="post-title">${p.title || ''}</span>
+            <span class="post-schedule">${p.suggested_post_day || ''} · ${p.suggested_post_time || ''}</span>
+          </div>
+          <div class="post-body">${p.body || ''}</div>
+          <div class="post-footer">
+            ${(p.hashtags || []).map(h => `<span class="hashtag-chip">${h}</span>`).join('')}
+            <button class="copy-btn" onclick="copyPost(this, ${JSON.stringify(p.body + '\n\n' + (p.hashtags || []).join(' ')).replace(/"/g, '&quot;')})">
+              Copy post ↗
+            </button>
+          </div>
+        `;
+        postsEl.appendChild(card);
+      });
+    }
+
+    // ── Render: Image Prompts ────────────────────────────────────────────
+    function renderImagePrompts(prompts) {
+      const grid = document.getElementById('image-prompts-grid');
+      grid.innerHTML = '';
+      prompts.forEach(({ label, prompt, error }) => {
+        const card = document.createElement('div');
+        card.className = 'image-card';
+        card.innerHTML = `
+          <div class="image-placeholder" style="background:${error ? 'rgba(234,67,53,0.05)' : 'var(--surface)'};">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);">${label}</span>
+          </div>
+          <div class="prompt-text">${prompt}</div>
+          <div class="image-actions">
+            <button class="img-copy-btn" onclick="copyPrompt(this, this.closest('.image-card').querySelector('.prompt-text').textContent)">
+              Copy prompt
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // ── Utilities ────────────────────────────────────────────────────────
+    window.copyPost = async function (btn, text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = '✅ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy post ↗'; btn.classList.remove('copied'); }, 2000);
+      } catch { btn.textContent = 'Failed'; }
+    };
+
+    window.copyPrompt = async function (btn, text) {
+      try {
+        await navigator.clipboard.writeText(text.trim());
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => { btn.textContent = 'Copy prompt'; }, 2000);
+      } catch {}
+    };
+
+    function showDashboard() {
+      document.getElementById('dashboard').classList.add('visible');
+    }
+
+    function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function buildSkeletonPosts() {
+      const wrap = document.createElement('div');
+      for (let i = 0; i < 3; i++) {
+        const s = document.createElement('div');
+        s.className = 'skeleton-card';
+        s.innerHTML = `
+          <div class="skeleton-line short shimmer" style="margin-bottom:12px;"></div>
+          <div class="skeleton-line full shimmer"></div>
+          <div class="skeleton-line medium shimmer"></div>
+          <div class="skeleton-line full shimmer" style="margin-top:4px;"></div>
+        `;
+        wrap.appendChild(s);
+      }
+      return wrap;
+    }
+
+    // Expose to global (used by onclick in HTML)
+    window.startAnalysis = window.startAnalysis;
+    window.addGitHub = window.addGitHub;
+    window.skipGitHub = window.skipGitHub;
+  </script>
+</body>
+</html>
