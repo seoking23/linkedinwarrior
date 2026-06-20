@@ -1,0 +1,32 @@
+# Environment & secrets — NEVER commit these
+.env
+.env.local
+*.key
+service-account.json
+*-credentials.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+venv/
+.venv/
+dist/
+*.egg-info/
+
+# Node
+node_modules/
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
