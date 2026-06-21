@@ -1070,6 +1070,11 @@
       width: 100%;
     }
     .linkedin-auth-cancel:hover { color: var(--text-secondary); }
+    .linkedin-import-details {
+      max-width: 600px;
+      margin: 16px auto 0;
+      text-align: left;
+    }
     .linkedin-paste-area {
       width: 100%;
       min-height: 100px;
@@ -1082,10 +1087,12 @@
       color: var(--text-primary);
       resize: vertical;
     }
-    .linkedin-import-details {
-      max-width: 600px;
-      margin: 16px auto 0;
-      text-align: left;
+    .linkedin-import-status {
+      margin-top: 10px;
+      font-size: 0.78rem;
+      color: var(--success);
+      text-align: center;
+      min-height: 1.2em;
     }
     .linkedin-import-details summary {
       font-size: 0.8rem;
@@ -1151,9 +1158,13 @@
         <textarea
           id="linkedin-paste-input"
           class="linkedin-paste-area"
-          placeholder="On linkedin.com/in/yourname (while signed in): press Ctrl+A / Cmd+A, copy, and paste here."
+          placeholder="On linkedin.com/in/yourname (signed in): Cmd+A / Ctrl+A, copy, paste here — or use Import profile below."
           spellcheck="false"
         ></textarea>
+        <button type="button" class="btn-linkedin-outline" id="linkedin-open-import-btn" style="margin-top:12px;">
+          Import from signed-in LinkedIn tab
+        </button>
+        <div id="linkedin-import-status" class="linkedin-import-status" aria-live="polite"></div>
       </details>
 
       <!-- LinkedIn optional import panel (bookmarklet) -->
@@ -1175,7 +1186,7 @@
             <button type="button" class="btn-linkedin-outline" id="linkedin-open-profile-btn">Open my profile</button>
             <div class="linkedin-bookmarklet-wrap">
               <a id="linkedin-bookmarklet-link" class="linkedin-bookmarklet-link" href="#">Import profile</a>
-              <div style="font-size:0.72rem;color:var(--text-muted);margin-top:8px;">Click on your profile page (popup must stay open)</div>
+              <div style="font-size:0.72rem;color:var(--text-muted);margin-top:8px;">On your profile page: drag Import profile to bookmarks, click it, or paste full page text above.</div>
             </div>
           </div>
           <div class="linkedin-auth-status" id="linkedin-auth-status"></div>
@@ -1367,6 +1378,11 @@
     import {
       resolveProfileTextForAnalysis,
       buildProfileBookmarkletHref,
+      getCombinedPastedProfileText,
+      installLinkedInProfileMessageListener,
+      requestLinkedInProfileImport,
+      getCachedProfileImport,
+      syncPastedProfileFields,
     } from './src/linkedin.js';
     import { renderLinkedInProfile } from './src/profile-view.js';
 
@@ -1389,6 +1405,11 @@
       if (statusEl) statusEl.textContent = message || '';
     }
 
+    function setLinkedInImportStatus(message) {
+      const statusEl = document.getElementById('linkedin-import-status');
+      if (statusEl) statusEl.textContent = message || '';
+    }
+
     function wireLinkedInAuthPanel(profileUrl) {
       const bookmarkletLink = document.getElementById('linkedin-bookmarklet-link');
       if (bookmarkletLink) bookmarkletLink.href = buildProfileBookmarkletHref();
@@ -1402,8 +1423,7 @@
         showLinkedInAuthPanel(false);
       };
       document.getElementById('linkedin-use-paste-btn').onclick = () => {
-        const text = panelPaste?.value || heroPaste?.value || '';
-        linkedinImportControls?.submitPastedText?.(text);
+        linkedinImportControls?.submitPastedText?.(getCombinedPastedProfileText());
       };
       document.getElementById('linkedin-open-profile-btn').onclick = () => {
         linkedinImportControls?.openProfile?.();
@@ -1416,10 +1436,42 @@
       };
     }
 
-    function getPastedProfileText() {
-      const heroPaste = document.getElementById('linkedin-paste-input')?.value?.trim() || '';
-      return heroPaste;
+    function openLinkedInImportPanel(profileUrl) {
+      const cached = getCachedProfileImport(profileUrl);
+      if (cached?.text) {
+        syncPastedProfileFields(cached.text);
+        updatePasteCharCount();
+        setLinkedInImportStatus(`Profile ready (${cached.text.length.toLocaleString()} characters)`);
+        return;
+      }
+
+      showLinkedInAuthPanel(true);
+      setLinkedInAuthStatus('Open your profile, paste text, or click Import profile on LinkedIn.');
+      requestLinkedInProfileImport(profileUrl, {
+        onNeedSignIn: (controls) => {
+          linkedinImportControls = controls;
+          wireLinkedInAuthPanel(profileUrl);
+        },
+        onStatus: (message) => {
+          setLinkedInAuthStatus(message);
+          if (/saved|imported/i.test(message)) updatePasteCharCount();
+        },
+      }).then((result) => {
+        if (result.profileText) {
+          profileText = result.profileText;
+          profileSource = result.fromCache ? 'cache' : 'paste';
+          updatePasteCharCount();
+        }
+        showLinkedInAuthPanel(false);
+        setLinkedInAuthStatus('');
+      }).catch((err) => {
+        console.warn('index.html: LinkedIn import cancelled:', err.message);
+        showLinkedInAuthPanel(false);
+        setLinkedInAuthStatus('');
+      });
     }
+
+    const getPastedProfileText = getCombinedPastedProfileText;
 
     function showFetchedProfile() {
       const displaySource = profileText.trim().startsWith('{') ? 'extract' : profileSource;
@@ -1431,8 +1483,43 @@
       }
     }
 
+    function updatePasteCharCount() {
+      const chars = getCombinedPastedProfileText().length;
+      if (chars >= 100) {
+        setLinkedInImportStatus(`Profile text ready (${chars.toLocaleString()} characters)`);
+      } else if (chars > 0) {
+        setLinkedInImportStatus(`Paste more text for full analysis (${chars.toLocaleString()} / 100+ characters)`);
+      } else {
+        setLinkedInImportStatus('');
+      }
+    }
+
     // ── Init ─────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
+      installLinkedInProfileMessageListener({
+        onProfileImported: ({ charCount }) => {
+          setLinkedInImportStatus(`Profile imported (${charCount.toLocaleString()} characters)`);
+          updatePasteCharCount();
+        },
+        onAuthError: (message) => {
+          setLinkedInAuthStatus(message);
+        },
+      });
+
+      for (const fieldId of ['linkedin-paste-input', 'linkedin-auth-paste']) {
+        document.getElementById(fieldId)?.addEventListener('input', updatePasteCharCount);
+      }
+
+      document.getElementById('linkedin-open-import-btn')?.addEventListener('click', () => {
+        const rawUrl = document.getElementById('linkedin-url')?.value?.trim() || '';
+        const errMsg = validateLinkedIn(rawUrl);
+        if (errMsg) {
+          setLinkedInImportStatus('Enter your LinkedIn URL first.');
+          return;
+        }
+        openLinkedInImportPanel(normalizeLinkedIn(rawUrl));
+      });
+
       // Restore settings
       const savedKey = localStorage.getItem('gemini_key') || getGeminiKey() || '';
       const savedBase = getApiBase() || '';
@@ -1550,15 +1637,15 @@
         return;
       }
 
-      const resolved = resolveProfileTextForAnalysis(linkedinUrl, getPastedProfileText());
+      const resolved = resolveProfileTextForAnalysis(linkedinUrl, getCombinedPastedProfileText());
       profileText = resolved.profileText;
       profileSource = resolved.source;
       if (resolved.source === 'cache') {
-        setProgress(8, 'Using imported LinkedIn profile…', 'fetch');
+        setProgress(8, `Using imported profile (${resolved.charCount.toLocaleString()} chars)…`, 'fetch');
       } else if (resolved.source === 'paste') {
-        setProgress(8, 'Using pasted profile text…', 'fetch');
+        setProgress(8, `Using pasted profile (${resolved.charCount.toLocaleString()} chars)…`, 'fetch');
       } else {
-        setProgress(8, 'Analyzing from profile URL…', 'fetch');
+        setProgress(8, 'Analyzing from profile URL — paste or import profile text for richer results…', 'fetch');
       }
 
       setProgress(12, 'Preparing your profile…', 'fetch');
