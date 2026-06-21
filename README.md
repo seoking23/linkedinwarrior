@@ -2,16 +2,17 @@
 
 AI-powered LinkedIn profile consultant built at the **GDG Newport Beach Google I/O Extended Lab & Hackathon** — June 20, 2026.
 
-Paste your LinkedIn URL. Get a full AI profile audit, a ready-to-post content plan, and AI image prompts — in seconds.
+Paste your LinkedIn URL. Get a full AI profile audit, 10 ready-to-post drafts, and AI image prompts — in seconds. Each draft has a one-click **Open in LinkedIn** button that copies the text and opens the LinkedIn composer in a new tab.
 
 ---
 
 ## What it does
 
 - **Profile Review** — Scores every section of your LinkedIn (headline, about, experience, skills, photo, recommendations, activity) with specific, actionable feedback
-- **Content Plan** — 5 ready-to-post LinkedIn posts personalized to your profile, including a GDG Newport Beach hackathon recap post
-- **Image Prompts** — Engineered Nano Banana Pro prompts for a 4K professional headshot and GDG hackathon badge
+- **Content Plan** — 10 ready-to-post LinkedIn drafts personalized to your profile, including a GDG Newport Beach hackathon recap post
+- **Image Prompts** — Engineered Nano Banana prompts for a 4K professional headshot, tech-leader portrait, and GDG hackathon badge
 - **GitHub enrichment** — Optional: add your GitHub URL to make the content plan richer with your actual projects
+- **Auto-fallback** — If the Cloud Shell backend is unreachable mid-pipeline, the frontend automatically falls back to client-side Gemini (Mode B) without user intervention
 
 ---
 
@@ -28,7 +29,7 @@ Static frontend (GitHub Pages) → Gemini API directly from browser (no server)
 ```
 Frontend  →  GitHub Pages (this repo, /frontend)
 Backend   →  Cloud Shell + FastAPI (/backend/main.py)
-AI        →  Gemini 2.0 Flash via Google AI Studio API key
+AI        →  Gemini 2.5 Flash (text) + 2.5 Flash Image / Nano Banana (images)
 GitHub    →  Public GitHub REST API (no auth needed for public profiles)
 Storage   →  localStorage (no database)
 ```
@@ -37,44 +38,48 @@ Storage   →  localStorage (no database)
 
 ## Quick start
 
-### 1. Get a Gemini API key (free)
+### Get a Gemini API key (free) — needed for either mode
 
 ```
 https://aistudio.google.com/apikey
 → Create API key → Select project → Copy key
 ```
 
-### 2. Deploy the frontend
+### Mode A — Cloud Shell backend (recommended for demo day)
 
-The GitHub Actions workflow in `.github/workflows/pages.yml` auto-deploys `/frontend` to GitHub Pages on every push to `main`.
-
-Enable GitHub Pages: **Settings → Pages → Source: gh-pages branch**
-
-Your frontend will be live at:
-```
-https://<your-username>.github.io/linkedinwarrior/
-```
-
-### 3. Start the backend (Cloud Shell)
+Open [Google Cloud Shell](https://shell.cloud.google.com/) and run:
 
 ```bash
-# In Google Cloud Shell:
 git clone https://github.com/<your-org>/linkedinwarrior.git
 cd linkedinwarrior
 bash start-demo.sh
 ```
 
-The script will:
-- Prompt for your Gemini API key
-- Test the API
-- Install dependencies
-- Start FastAPI on port 8080
+The script prompts for your Gemini key, smoke-tests it, installs deps, and starts uvicorn on port 8080.
 
-Then click **Web Preview → Preview on port 8080** and copy the URL into the app's Settings panel.
+Then:
+1. Click **Web Preview** (top-right Cloud Shell toolbar) → **Preview on port 8080**
+2. Copy the `https://8080-cs-…cloudshell.dev` URL from the new tab
+3. Open the frontend, click ⚙ **Settings**, paste into **Cloud Shell API URL**, **Save**
+4. Sanity check: visit `<URL>/health` — you should see JSON with `"gemini_key_set": true`
 
-### 4. Run purely client-side (fallback)
+### Mode B — Pure client-side (no backend)
 
-If Cloud Shell isn't available, open the app and go to **Settings → Gemini API Key** and paste your AI Studio key. All AI calls run directly in the browser.
+1. Open the frontend
+2. Click ⚙ **Settings** → paste your Gemini key into **Gemini API Key** → **Save**
+3. Done — all AI calls run directly in the browser
+
+### Deploy the frontend
+
+GitHub Actions in `.github/workflows/pages.yml` auto-deploys `/frontend` to GitHub Pages on every push to `main`. Enable Pages once: **Settings → Pages → Source: GitHub Actions**.
+
+Live at `https://<your-username>.github.io/linkedinwarrior/`.
+
+> ⚠️ The deploy workflow can inject a `GEMINI_KEY` secret directly into the deployed HTML (see `scripts/inject-frontend-config.py`). Leave that secret **unset** unless you intend the key to be readable by anyone visiting the site — end users can paste their own key in Settings instead.
+
+### Auto-fallback (Mode A → Mode B)
+
+If the Cloud Shell backend goes down mid-pipeline, the frontend automatically falls back to client-side Gemini *provided* a Gemini key is set in Settings. Add both for resilience.
 
 ---
 
@@ -83,20 +88,24 @@ If Cloud Shell isn't available, open the app and go to **Settings → Gemini API
 ```
 linkedinwarrior/
 ├── backend/
-│   ├── main.py             — FastAPI server (runs in Cloud Shell)
-│   └── requirements.txt
+│   ├── main.py                          — FastAPI server (runs in Cloud Shell)
+│   ├── requirements.txt
+│   └── agents/
+│       ├── gemini_client.py             — google-genai SDK wrapper
+│       ├── prompts.py                   — Harness + task prompts, JSON schemas
+│       └── schemas.py
 ├── frontend/
-│   ├── index.html          — Full single-page app
+│   ├── index.html                       — Full single-page app
 │   └── src/
-│       ├── gemini.js       — Gemini API client + agent wrappers
-│       ├── github.js       — GitHub public API fetch
-│       ├── storage.js      — localStorage session persistence
-│       └── config.js       — API base switcher (server vs client mode)
-├── .github/
-│   └── workflows/
-│       └── pages.yml       — GitHub Pages auto-deploy
-├── start-demo.sh           — One-command demo startup for Cloud Shell
-├── .env.example            — Safe to commit — no real values
+│       ├── gemini.js                    — Gemini client + agent wrappers
+│       ├── github.js                    — GitHub public API fetch
+│       ├── storage.js                   — localStorage session persistence
+│       └── config.js                    — Mode switcher + apiPostWithFallback
+├── scripts/
+│   └── inject-frontend-config.py        — Build-time config injection (CI)
+├── .github/workflows/pages.yml          — GitHub Pages auto-deploy
+├── start-demo.sh                        — One-command demo startup
+├── .env.example                         — Safe to commit — no real values
 └── README.md
 ```
 
@@ -106,9 +115,11 @@ linkedinwarrior/
 
 ```
 GET  /health                — Health check + API key status
+POST /api/extract-profile   — Structure pasted profile text into typed ProfileData
 POST /api/analyze           — LinkedIn profile review (returns scored JSON)
-POST /api/content-plan      — 5-post LinkedIn content plan
-POST /api/image-prompt      — Engineered image generation prompt
+POST /api/content-plan      — 10-post LinkedIn content plan
+POST /api/image-prompt      — Engineered image generation prompt (Nano Banana)
+POST /api/generate-image    — Direct image generation via gemini-2.5-flash-image
 ```
 
 ---

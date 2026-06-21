@@ -3,47 +3,84 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
   <title>LinkedIn Warrior — AI Profile Consultant</title>
   <meta name="description" content="AI-powered LinkedIn profile review, content plan, and professional images. Built at GDG Newport Beach Google I/O Extended Hackathon 2026." />
 
-  <!-- Google Fonts: Space Grotesk (display) + Inter (body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&display=swap" rel="stylesheet" />
+  <!-- BUILD_CONFIG_INJECT -->
 
   <style>
     /* ── Tokens ─────────────────────────────────────────────────── */
     :root {
-      --black:     #0a0a0f;
-      --surface:   #13131a;
-      --card:      #1a1a24;
-      --border:    #2a2a38;
-      --border-hi: #3a3a50;
+      --bg:            #ffffff;
+      --surface:       #f5f5f5;
+      --card:          #fafafa;
+      --border:        #e0e0e0;
+      --border-hi:     #bdbdbd;
 
-      --google-blue:   #4285F4;
-      --google-red:    #EA4335;
-      --google-yellow: #FBBC05;
-      --google-green:  #34A853;
+      --color-blue:    #4285F4;
+      --color-green:   #34A853;
+      --color-yellow:  #FBBC05;
+      --color-red:     #EA4335;
 
-      --accent:    #4285F4;
-      --accent-lo: rgba(66,133,244,0.12);
-      --warn:      #FBBC05;
-      --warn-lo:   rgba(251,188,5,0.12);
-      --danger:    #EA4335;
-      --success:   #34A853;
+      --accent:        var(--color-blue);
+      --accent-2:      var(--color-green);
+      --accent-lo:     rgba(66, 133, 244, 0.12);
+      --accent-inv:    #ffffff;
+      --success:       var(--color-green);
+      --success-lo:    rgba(52, 168, 83, 0.12);
+      --warn:          var(--color-yellow);
+      --danger:        var(--color-red);
+      --danger-lo:     rgba(234, 67, 53, 0.08);
 
-      --text-primary:   #f0f0f5;
-      --text-secondary: #9090a8;
-      --text-muted:     #60607a;
+      --text-primary:   #0a0a0a;
+      --text-secondary: #505050;
+      --text-muted:     #888888;
 
-      --font-display: 'Space Grotesk', system-ui, sans-serif;
-      --font-body:    'Inter', system-ui, sans-serif;
+      --font-display: 'Fjalla One', system-ui, sans-serif;
+      --font-body:    'Source Serif 4', Georgia, serif;
 
       --radius-sm:  6px;
       --radius-md:  12px;
       --radius-lg:  20px;
 
-      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      --header-bg: rgba(255, 255, 255, 0.95);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:            #0a0a0a;
+        --surface:       #141414;
+        --card:          #1a1a1a;
+        --border:        #2a2a2a;
+        --border-hi:     #3a3a3a;
+
+        --color-blue:    #5a9bff;
+        --color-green:   #4caf6e;
+        --color-yellow:  #f5c842;
+        --color-red:     #f06a5a;
+
+        --accent:        var(--color-blue);
+        --accent-2:      var(--color-green);
+        --accent-lo:     rgba(90, 155, 255, 0.15);
+        --accent-inv:    #ffffff;
+        --success:       var(--color-green);
+        --success-lo:    rgba(76, 175, 110, 0.15);
+        --warn:          var(--color-yellow);
+        --danger:        var(--color-red);
+        --danger-lo:     rgba(240, 106, 90, 0.12);
+
+        --text-primary:   #f5f5f5;
+        --text-secondary: #a0a0a0;
+        --text-muted:     #666666;
+
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        --header-bg: rgba(10, 10, 10, 0.95);
+      }
     }
 
     /* ── Reset ──────────────────────────────────────────────────── */
@@ -51,11 +88,27 @@
     html { scroll-behavior: smooth; }
     body {
       font-family: var(--font-body);
-      background: var(--black);
+      background: var(--bg);
       color: var(--text-primary);
       min-height: 100vh;
       line-height: 1.6;
     }
+
+    .icon-svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+    .section-icon .icon-svg { width: 18px; height: 18px; }
+    .status-icon { width: 16px; height: 16px; }
+    .status-icon.status-good { color: var(--success); }
+    .status-icon.status-mid  { color: var(--warn); }
+    .status-icon.status-low  { color: var(--danger); }
     a { color: var(--accent); text-decoration: none; }
     a:hover { text-decoration: underline; }
     button { font-family: var(--font-body); cursor: pointer; border: none; }
@@ -74,7 +127,7 @@
       padding: 16px 0;
       position: sticky;
       top: 0;
-      background: rgba(10,10,15,0.95);
+      background: var(--header-bg);
       backdrop-filter: blur(12px);
       z-index: 100;
     }
@@ -94,8 +147,7 @@
     }
     .logo-dot {
       width: 10px; height: 10px; border-radius: 50%;
-      background: var(--google-blue);
-      box-shadow: 0 0 8px var(--google-blue);
+      background: var(--accent);
     }
     .header-badge {
       font-size: 0.7rem;
@@ -116,9 +168,10 @@
     .gdg-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      font-family: var(--font-display);
       font-size: 0.75rem;
-      font-weight: 600;
+      font-weight: 400;
       letter-spacing: 0.04em;
       text-transform: uppercase;
       color: var(--text-secondary);
@@ -127,13 +180,7 @@
       padding: 5px 14px;
       margin-bottom: 28px;
     }
-    .gdg-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-    }
-    .gdg-dot.blue   { background: var(--google-blue); }
-    .gdg-dot.red    { background: var(--google-red); }
-    .gdg-dot.yellow { background: var(--google-yellow); }
-    .gdg-dot.green  { background: var(--google-green); }
+    .gdg-pill .icon-svg { width: 14px; height: 14px; color: var(--accent); opacity: 0.85; }
 
     h1 {
       font-family: var(--font-display);
@@ -145,11 +192,10 @@
       color: var(--text-primary);
     }
     h1 em {
-      font-style: normal;
-      background: linear-gradient(135deg, var(--google-blue) 0%, var(--google-green) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-style: italic;
+      font-family: var(--font-body);
+      font-weight: 400;
+      color: var(--accent);
     }
     .hero-sub {
       font-size: 1.1rem;
@@ -185,7 +231,7 @@
 
     .btn-primary {
       background: var(--accent);
-      color: #fff;
+      color: var(--accent-inv);
       border-radius: var(--radius-md);
       padding: 14px 24px;
       font-size: 0.95rem;
@@ -241,7 +287,7 @@
     }
     .progress-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--google-blue), var(--google-green));
+      background: linear-gradient(90deg, var(--color-blue), var(--color-green));
       border-radius: 100px;
       transition: width 0.6s ease;
       width: 0%;
@@ -267,7 +313,7 @@
       color: var(--accent);
     }
     .step-chip.done {
-      background: rgba(52,168,83,0.1);
+      background: var(--success-lo);
       border-color: var(--success);
       color: var(--success);
     }
@@ -282,6 +328,9 @@
       font-size: 0.8rem;
       cursor: pointer;
       transition: color 0.15s, border-color 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
     #settings-toggle:hover { color: var(--text-primary); border-color: var(--border-hi); }
     #settings-panel {
@@ -369,6 +418,128 @@
     .score-label { font-size: 0.6rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; }
     .score-summary { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; max-width: 420px; }
 
+    /* ── Fetched LinkedIn profile ─────────────────────────────────── */
+    #linkedin-profile-section { display: none; margin-bottom: 8px; }
+    .li-profile-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .li-profile-banner {
+      height: 72px;
+      background: linear-gradient(135deg, #0a66c2 0%, #004182 55%, #1a1a24 100%);
+    }
+    .li-profile-body { padding: 0 22px 22px; position: relative; }
+    .li-profile-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 3px solid var(--card);
+      margin-top: -36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .li-profile-head { margin-top: 12px; margin-bottom: 20px; }
+    .li-profile-name {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .li-profile-headline {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+    .li-profile-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+    .li-profile-source-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .li-profile-source-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      background: var(--accent-lo);
+      border: 1px solid rgba(66,133,244,0.25);
+      border-radius: 100px;
+      padding: 4px 10px;
+    }
+    .li-profile-link {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .li-profile-block { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); }
+    .li-profile-block-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .li-profile-about {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      white-space: pre-wrap;
+    }
+    .li-profile-exp-item { margin-bottom: 14px; }
+    .li-profile-exp-item:last-child { margin-bottom: 0; }
+    .li-profile-exp-title { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); }
+    .li-profile-exp-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .li-profile-exp-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      line-height: 1.6;
+    }
+    .li-profile-skills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .li-profile-skill {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 4px 10px;
+    }
+    .li-profile-cert-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .li-profile-empty {
+      margin-top: 18px;
+      padding: 16px;
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .li-profile-empty a { color: var(--accent); font-weight: 600; }
+
     /* Section header */
     .section-header {
       display: flex;
@@ -382,7 +553,9 @@
       width: 32px; height: 32px;
       border-radius: var(--radius-sm);
       display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--accent);
     }
     .section-title {
       font-family: var(--font-display);
@@ -416,7 +589,7 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    .profile-item-header:hover { background: rgba(255,255,255,0.02); }
+    .profile-item-header:hover { background: var(--accent-lo); }
     .item-name {
       font-weight: 500;
       font-size: 0.9rem;
@@ -438,7 +611,11 @@
       width: 40px;
       text-align: right;
     }
-    .score-status { font-size: 1rem; }
+    .score-status {
+      display: flex;
+      align-items: center;
+      color: var(--text-secondary);
+    }
     .item-body {
       display: none;
       padding: 0 18px 18px;
@@ -470,8 +647,8 @@
       margin-bottom: 20px;
     }
     .fix-card {
-      background: rgba(251,188,5,0.06);
-      border: 1px solid rgba(251,188,5,0.2);
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: var(--radius-md);
       padding: 12px 16px;
       font-size: 0.85rem;
@@ -481,7 +658,7 @@
     }
     .fix-num {
       font-family: var(--font-display);
-      font-weight: 700;
+      font-weight: 400;
       color: var(--warn);
       font-size: 1rem;
       line-height: 1;
@@ -512,18 +689,17 @@
       width: 20px;
     }
     .post-type-badge {
+      font-family: var(--font-display);
       font-size: 0.65rem;
-      font-weight: 700;
+      font-weight: 400;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       padding: 3px 8px;
       border-radius: 100px;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      background: var(--surface);
     }
-    .type-event    { background: rgba(66,133,244,0.15); color: var(--google-blue); }
-    .type-project  { background: rgba(52,168,83,0.15);  color: var(--google-green); }
-    .type-story    { background: rgba(234,67,53,0.15);  color: var(--google-red); }
-    .type-insight  { background: rgba(251,188,5,0.15);  color: var(--google-yellow); }
-    .type-engagement { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
 
     .post-title { font-weight: 600; font-size: 0.875rem; flex: 1; }
     .post-schedule {
@@ -555,21 +731,37 @@
     }
     .copy-btn {
       margin-left: auto;
-      background: var(--accent-lo);
-      color: var(--accent);
-      border: 1px solid rgba(66,133,244,0.3);
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 6px 14px;
       font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, border-color 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
-    .copy-btn:hover { background: rgba(66,133,244,0.2); }
+    .copy-btn:hover { background: var(--accent-lo); border-color: var(--border-hi); }
     .copy-btn.copied {
-      background: rgba(52,168,83,0.15);
-      color: var(--success);
-      border-color: rgba(52,168,83,0.3);
+      background: var(--accent-lo);
+      color: var(--text-primary);
+      border-color: var(--border-hi);
+    }
+    .copy-btn + .copy-btn { margin-left: 8px; }
+    .copy-btn-primary {
+      background: var(--accent);
+      color: var(--accent-inv);
+      border-color: var(--accent);
+    }
+    .copy-btn-primary:hover { background: var(--color-blue); opacity: 0.9; }
+    .post-hint {
+      padding: 6px 18px 12px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-style: italic;
     }
 
     /* GitHub prompt */
@@ -585,8 +777,11 @@
     .gh-header {
       font-family: var(--font-display);
       font-size: 1rem;
-      font-weight: 700;
+      font-weight: 400;
       margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     .gh-sub { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 18px; }
     .gh-input-row { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -656,6 +851,36 @@
       font-size: 0.8rem;
     }
     .image-placeholder svg { opacity: 0.3; }
+    .image-placeholder.image-error {
+      background: var(--danger-lo);
+      color: var(--danger);
+    }
+    .image-status {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .image-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .image-spinner {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .image-output {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      display: block;
+    }
     .prompt-text {
       padding: 10px 12px;
       font-size: 0.75rem;
@@ -690,8 +915,8 @@
     .empty-state p { font-size: 0.875rem; }
 
     .error-banner {
-      background: rgba(234,67,53,0.08);
-      border: 1px solid rgba(234,67,53,0.25);
+      background: var(--danger-lo);
+      border: 1px solid var(--border);
       border-radius: var(--radius-md);
       padding: 12px 16px;
       font-size: 0.875rem;
@@ -700,8 +925,8 @@
     }
 
     .info-banner {
-      background: var(--accent-lo);
-      border: 1px solid rgba(66,133,244,0.2);
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: var(--radius-md);
       padding: 12px 16px;
       font-size: 0.875rem;
@@ -717,8 +942,6 @@
       font-size: 0.8rem;
       color: var(--text-muted);
     }
-    .gdg-colors { display: inline-flex; gap: 3px; margin-left: 4px; }
-    .gc { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
 
     /* Shimmer */
     @keyframes shimmer {
@@ -726,7 +949,14 @@
       100% { background-position: 400px 0; }
     }
     .shimmer {
-      background: linear-gradient(90deg, var(--card) 25%, var(--surface) 50%, var(--card) 75%);
+      background: linear-gradient(
+        90deg,
+        var(--card) 20%,
+        var(--accent-lo) 40%,
+        var(--success-lo) 50%,
+        var(--accent-lo) 60%,
+        var(--card) 80%
+      );
       background-size: 800px 100%;
       animation: shimmer 1.6s infinite linear;
       border-radius: var(--radius-sm);
@@ -750,6 +980,122 @@
       .section { padding: 40px 0; }
       #hero { padding: 60px 0 40px; }
     }
+
+    /* ── LinkedIn sign-in panel ───────────────────────────────────── */
+    #linkedin-auth-panel {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(10,10,15,0.92);
+      backdrop-filter: blur(14px);
+      padding: 24px 20px;
+      overflow-y: auto;
+    }
+    #linkedin-auth-panel.visible { display: flex; align-items: center; justify-content: center; }
+    .linkedin-auth-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+    }
+    .linkedin-auth-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+    .linkedin-auth-copy {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .linkedin-auth-steps {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin: 16px 0 20px;
+      padding-left: 18px;
+    }
+    .linkedin-auth-actions { display: flex; flex-direction: column; gap: 10px; }
+    .linkedin-auth-actions .btn-primary { width: 100%; text-align: center; }
+    .btn-linkedin-outline {
+      width: 100%;
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .btn-linkedin-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .linkedin-bookmarklet-wrap {
+      margin-top: 4px;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px dashed var(--border-hi);
+      border-radius: var(--radius-md);
+      text-align: center;
+    }
+    .linkedin-bookmarklet-link {
+      display: inline-block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-lo);
+      border: 1px solid rgba(66,133,244,0.25);
+    }
+    .linkedin-bookmarklet-link:hover { text-decoration: none; opacity: 0.9; }
+    .linkedin-auth-status {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 14px;
+      min-height: 1.2em;
+    }
+    .linkedin-auth-cancel {
+      margin-top: 12px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      width: 100%;
+    }
+    .linkedin-auth-cancel:hover { color: var(--text-secondary); }
+    .linkedin-paste-area {
+      width: 100%;
+      min-height: 100px;
+      margin-top: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+      resize: vertical;
+    }
+    .linkedin-import-details {
+      max-width: 600px;
+      margin: 16px auto 0;
+      text-align: left;
+    }
+    .linkedin-import-details summary {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      list-style: none;
+    }
+    .linkedin-import-details summary::-webkit-details-marker { display: none; }
+    .linkedin-import-details[open] summary { margin-bottom: 10px; color: var(--accent); }
   </style>
 </head>
 <body>
@@ -762,7 +1108,10 @@
         LinkedIn Warrior
       </div>
       <div style="display:flex;gap:10px;align-items:center;">
-        <button id="settings-toggle">⚙ Settings</button>
+        <button id="settings-toggle">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Settings
+        </button>
         <span class="header-badge">GDG Newport Beach · June 20, 2026</span>
       </div>
     </div>
@@ -772,18 +1121,14 @@
   <section id="hero">
     <div class="container">
       <div class="gdg-pill">
-        <span class="gdg-dot blue"></span>
-        <span class="gdg-dot red"></span>
-        <span class="gdg-dot yellow"></span>
-        <span class="gdg-dot green"></span>
+        <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Built at Google I/O Extended Hackathon 2026
       </div>
 
       <h1>Your LinkedIn profile,<br /><em>actually good</em></h1>
 
       <p class="hero-sub">
-        Paste your LinkedIn URL. Get a full AI profile audit, a ready-to-post content plan,
-        and a GDG Newport Beach hackathon badge in seconds.
+        Paste your LinkedIn URL and analyze. Optional: paste profile text from your signed-in LinkedIn tab for richer results.
       </p>
 
       <div class="input-wrap">
@@ -800,6 +1145,43 @@
         </button>
       </div>
       <div id="url-error" class="input-error" style="display:none;"></div>
+
+      <details class="linkedin-import-details" id="linkedin-import-details">
+        <summary>+ Paste profile text for richer analysis (optional)</summary>
+        <textarea
+          id="linkedin-paste-input"
+          class="linkedin-paste-area"
+          placeholder="On linkedin.com/in/yourname (while signed in): press Ctrl+A / Cmd+A, copy, and paste here."
+          spellcheck="false"
+        ></textarea>
+      </details>
+
+      <!-- LinkedIn optional import panel (bookmarklet) -->
+      <div id="linkedin-auth-panel" aria-hidden="true">
+        <div class="linkedin-auth-card">
+          <div class="linkedin-auth-title">Import LinkedIn profile</div>
+          <p class="linkedin-auth-copy">
+            Optional — analysis already works from your URL. Import or paste profile text for more accurate AI feedback.
+          </p>
+          <textarea
+            id="linkedin-auth-paste"
+            class="linkedin-paste-area"
+            placeholder="Paste profile text here (Ctrl+A on your LinkedIn profile page, then copy)."
+            spellcheck="false"
+          ></textarea>
+          <div class="linkedin-auth-actions" style="margin-top:16px;">
+            <button type="button" class="btn-primary" id="linkedin-continue-btn">I'm signed in — continue →</button>
+            <button type="button" class="btn-linkedin-outline" id="linkedin-use-paste-btn">Use pasted text</button>
+            <button type="button" class="btn-linkedin-outline" id="linkedin-open-profile-btn">Open my profile</button>
+            <div class="linkedin-bookmarklet-wrap">
+              <a id="linkedin-bookmarklet-link" class="linkedin-bookmarklet-link" href="#">Import profile</a>
+              <div style="font-size:0.72rem;color:var(--text-muted);margin-top:8px;">Click on your profile page (popup must stay open)</div>
+            </div>
+          </div>
+          <div class="linkedin-auth-status" id="linkedin-auth-status"></div>
+          <button type="button" class="linkedin-auth-cancel" id="linkedin-auth-cancel">Cancel</button>
+        </div>
+      </div>
 
       <!-- Settings panel -->
       <div id="settings-panel">
@@ -834,7 +1216,7 @@
           <span class="step-chip" id="chip-fetch">Fetching profile</span>
           <span class="step-chip" id="chip-analyze">Analyzing</span>
           <span class="step-chip" id="chip-content">Content plan</span>
-          <span class="step-chip" id="chip-images">Image prompts</span>
+          <span class="step-chip" id="chip-images">AI images</span>
         </div>
       </div>
     </div>
@@ -849,10 +1231,24 @@
         <div class="dash-title" id="dash-title">Your LinkedIn AI Report</div>
       </div>
 
+      <!-- ── Fetched LinkedIn profile ──────────────────────────────── -->
+      <div id="linkedin-profile-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          </div>
+          <div class="section-title">Your Profile</div>
+          <div class="section-count" id="profile-source-pill">Fetched</div>
+        </div>
+        <div id="linkedin-profile-card"></div>
+      </div>
+
       <!-- ── Section 1: Profile Review ─────────────────────────────── -->
       <div>
         <div class="section-header">
-          <div class="section-icon" style="background:var(--accent-lo);">🎯</div>
+          <div class="section-icon">
+            <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          </div>
           <div class="section-title">Profile Review</div>
           <div class="section-count" id="review-score-pill">–/100</div>
         </div>
@@ -862,7 +1258,7 @@
             <svg viewBox="0 0 100 100" width="100" height="100">
               <circle cx="50" cy="50" r="42" fill="none" stroke="var(--border)" stroke-width="8"/>
               <circle id="score-circle" cx="50" cy="50" r="42" fill="none"
-                stroke="var(--google-blue)" stroke-width="8"
+                stroke="var(--accent)" stroke-width="8"
                 stroke-dasharray="264" stroke-dashoffset="264"
                 stroke-linecap="round"
                 style="transition: stroke-dashoffset 1s ease"/>
@@ -882,7 +1278,10 @@
 
       <!-- ── GitHub prompt ──────────────────────────────────────────── -->
       <div id="github-section">
-        <div class="gh-header">🔗 Want a richer content plan?</div>
+        <div class="gh-header">
+          <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          Want a richer content plan?
+        </div>
         <div class="gh-sub">
           Add your GitHub profile to generate posts that show off your actual projects and code.
         </div>
@@ -908,7 +1307,9 @@
       <!-- ── Section 2: Content Plan ────────────────────────────────── -->
       <div id="content-section">
         <div class="section-header">
-          <div class="section-icon" style="background:rgba(52,168,83,0.1);">✍️</div>
+          <div class="section-icon">
+            <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
           <div class="section-title">Content Plan</div>
           <div class="section-count" id="post-count-pill">5 posts</div>
         </div>
@@ -924,7 +1325,9 @@
       <!-- ── Section 3: Image Prompts ───────────────────────────────── -->
       <div id="images-section">
         <div class="section-header">
-          <div class="section-icon" style="background:rgba(251,188,5,0.1);">🖼</div>
+          <div class="section-icon">
+            <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
           <div class="section-title">AI Image Prompts</div>
           <div class="section-count">3 prompts</div>
         </div>
@@ -949,12 +1352,6 @@
   <footer>
     <div class="container">
       Built at <strong>GDG Newport Beach</strong> · Google I/O Extended Lab &amp; Hackathon · June 20, 2026
-      <span class="gdg-colors">
-        <span class="gc" style="background:#4285F4"></span>
-        <span class="gc" style="background:#EA4335"></span>
-        <span class="gc" style="background:#FBBC05"></span>
-        <span class="gc" style="background:#34A853"></span>
-      </span>
       <br/>
       <span style="color:var(--text-muted);font-size:0.75rem;">
         Powered by Gemini · GitHub Pages · LinkedIn Warrior v1.0
@@ -963,22 +1360,82 @@
   </footer>
 
   <script type="module">
-    import { callGemini, analyzeLinkedIn, generateContentPlan, generateImagePrompt, getGeminiKey } from './src/gemini.js';
+    import { analyzeLinkedIn, generateContentPlan, generateImagePrompt, generateNanoBananaImage, getGeminiKey, extractProfileData } from './src/gemini.js';
     import { fetchGitHubProfile, parseGitHubUsername } from './src/github.js';
     import { saveSession, loadSession, updateSession, setGithubToken, getGithubToken } from './src/storage.js';
-    import { getApiBase, setApiBase, apiPost } from './src/config.js';
+    import { getApiBase, setApiBase, apiPost, apiPostWithFallback } from './src/config.js';
+    import {
+      resolveProfileTextForAnalysis,
+      buildProfileBookmarkletHref,
+    } from './src/linkedin.js';
+    import { renderLinkedInProfile } from './src/profile-view.js';
 
     // ── Globals ─────────────────────────────────────────────────────────
     let linkedinUrl = '';
     let profileText = '';
     let reviewData = null;
     let githubData = null;
+    let profileSource = 'url';
+    let linkedinImportControls = null;
+
+    function showLinkedInAuthPanel(show) {
+      const panel = document.getElementById('linkedin-auth-panel');
+      panel.classList.toggle('visible', show);
+      panel.setAttribute('aria-hidden', show ? 'false' : 'true');
+    }
+
+    function setLinkedInAuthStatus(message) {
+      const statusEl = document.getElementById('linkedin-auth-status');
+      if (statusEl) statusEl.textContent = message || '';
+    }
+
+    function wireLinkedInAuthPanel(profileUrl) {
+      const bookmarkletLink = document.getElementById('linkedin-bookmarklet-link');
+      if (bookmarkletLink) bookmarkletLink.href = buildProfileBookmarkletHref();
+
+      const heroPaste = document.getElementById('linkedin-paste-input');
+      const panelPaste = document.getElementById('linkedin-auth-paste');
+      if (heroPaste?.value && panelPaste) panelPaste.value = heroPaste.value;
+
+      document.getElementById('linkedin-continue-btn').onclick = () => {
+        linkedinImportControls?.continueUrlOnly?.();
+        showLinkedInAuthPanel(false);
+      };
+      document.getElementById('linkedin-use-paste-btn').onclick = () => {
+        const text = panelPaste?.value || heroPaste?.value || '';
+        linkedinImportControls?.submitPastedText?.(text);
+      };
+      document.getElementById('linkedin-open-profile-btn').onclick = () => {
+        linkedinImportControls?.openProfile?.();
+        setLinkedInAuthStatus('On your profile page, click Import profile or paste text above.');
+      };
+      document.getElementById('linkedin-auth-cancel').onclick = () => {
+        linkedinImportControls?.cancel?.();
+        showLinkedInAuthPanel(false);
+        setLinkedInAuthStatus('');
+      };
+    }
+
+    function getPastedProfileText() {
+      const heroPaste = document.getElementById('linkedin-paste-input')?.value?.trim() || '';
+      return heroPaste;
+    }
+
+    function showFetchedProfile() {
+      const displaySource = profileText.trim().startsWith('{') ? 'extract' : profileSource;
+      renderLinkedInProfile('linkedin-profile-card', profileText, linkedinUrl, displaySource);
+      const pill = document.getElementById('profile-source-pill');
+      if (pill) {
+        const labels = { cache: 'Imported', paste: 'Pasted', url: 'URL only', extract: 'Structured' };
+        pill.textContent = labels[displaySource] || 'Fetched';
+      }
+    }
 
     // ── Init ─────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
       // Restore settings
-      const savedKey = localStorage.getItem('gemini_key') || '';
-      const savedBase = localStorage.getItem('api_base') || '';
+      const savedKey = localStorage.getItem('gemini_key') || getGeminiKey() || '';
+      const savedBase = getApiBase() || '';
       if (savedKey) document.getElementById('gemini-key-input').value = savedKey;
       if (savedBase) document.getElementById('api-base-input').value = savedBase;
 
@@ -998,10 +1455,12 @@
       if (session?.review) {
         linkedinUrl = session.linkedinUrl || '';
         profileText = session.profileText || '';
+        profileSource = session.profileSource || (profileText ? 'paste' : 'url');
         reviewData = session.review;
         githubData = session.github || null;
         document.getElementById('linkedin-url').value = linkedinUrl;
         showDashboard();
+        showFetchedProfile();
         renderReview(reviewData);
         if (session.contentPlan) renderContentPlan(session.contentPlan);
         if (session.imagePrompts) renderImagePrompts(session.imagePrompts);
@@ -1072,16 +1531,13 @@
       urlInput.classList.remove('error');
 
       linkedinUrl = normalizeLinkedIn(rawUrl);
-      profileText = ''; // Would be set by a paste flow in production
 
       const btn = document.getElementById('analyze-btn');
       btn.disabled = true;
       btn.textContent = 'Analyzing…';
 
       document.getElementById('progress-section').classList.add('visible');
-      setProgress(5, 'Fetching your LinkedIn profile…', 'fetch');
 
-      // Check if we have a key or API base
       const apiBase = getApiBase();
       const geminiKey = getGeminiKey();
       if (!apiBase && !geminiKey) {
@@ -1094,27 +1550,55 @@
         return;
       }
 
-      showDashboard();
-      window.scrollTo({ top: document.getElementById('dashboard').offsetTop - 80, behavior: 'smooth' });
+      const resolved = resolveProfileTextForAnalysis(linkedinUrl, getPastedProfileText());
+      profileText = resolved.profileText;
+      profileSource = resolved.source;
+      if (resolved.source === 'cache') {
+        setProgress(8, 'Using imported LinkedIn profile…', 'fetch');
+      } else if (resolved.source === 'paste') {
+        setProgress(8, 'Using pasted profile text…', 'fetch');
+      } else {
+        setProgress(8, 'Analyzing from profile URL…', 'fetch');
+      }
 
-      // Step 1: "Fetch" (we simulate since real LinkedIn scraping needs backend)
-      await delay(800);
-      setProgress(20, 'Analyzing your profile…', 'analyze');
+      setProgress(12, 'Preparing your profile…', 'fetch');
+
+      // Step 1: Extract structured profile when we have raw import text
+      await delay(400);
+      if (profileText.length > 100 && !profileText.trim().startsWith('{')) {
+        setProgress(16, 'Structuring profile data…', 'fetch');
+        try {
+          const extracted = await apiPostWithFallback(
+            '/api/extract-profile',
+            { linkedin_url: linkedinUrl, linkedin_text: profileText },
+            () => extractProfileData(profileText, linkedinUrl),
+          );
+          profileText = JSON.stringify(extracted);
+          updateSession({ profileText });
+          showFetchedProfile();
+        } catch (extractErr) {
+          console.warn('index.html: extract profile failed, using raw text:', extractErr.message);
+        }
+      }
       markChipDone('fetch');
+      setProgress(20, 'Analyzing your profile…', 'analyze');
+
+      showDashboard();
+      showFetchedProfile();
+      window.scrollTo({ top: document.getElementById('dashboard').offsetTop - 80, behavior: 'smooth' });
 
       // Step 2: Analyze
       try {
-        let review;
-        if (apiBase) {
-          review = await apiPost('/api/analyze', { linkedin_url: linkedinUrl, linkedin_text: profileText });
-        } else {
-          review = await analyzeLinkedIn(linkedinUrl, profileText);
-        }
+        const review = await apiPostWithFallback(
+          '/api/analyze',
+          { linkedin_url: linkedinUrl, linkedin_text: profileText },
+          () => analyzeLinkedIn(linkedinUrl, profileText),
+        );
         reviewData = review;
         setProgress(50, 'Analysis complete — generating content plan…', 'content');
         markChipDone('analyze');
         renderReview(review);
-        updateSession({ linkedinUrl, profileText, review });
+        updateSession({ linkedinUrl, profileText, profileSource, review });
 
         // Show GitHub prompt
         document.getElementById('github-section').classList.add('visible');
@@ -1128,14 +1612,17 @@
         await runImagePrompts(apiBase);
         markChipDone('images');
 
-        setProgress(100, '✅ Done!', '');
+        setProgress(100, 'Done!', '');
         setTimeout(() => {
           document.getElementById('progress-section').classList.remove('visible');
         }, 2000);
 
       } catch (err) {
         console.error(err);
-        document.getElementById('review-error').textContent = 'Analysis failed: ' + err.message;
+        const hint = getApiBase()
+          ? ' Try again — if the backend is down, add a Gemini key in Settings to use client-side mode.'
+          : ' Try again or verify your Gemini key in Settings.';
+        document.getElementById('review-error').textContent = 'Analysis failed: ' + err.message + hint;
         document.getElementById('review-error').style.display = 'block';
       } finally {
         btn.disabled = false;
@@ -1150,17 +1637,16 @@
       document.getElementById('posts-list').appendChild(loadingEl);
 
       try {
-        let plan;
-        if (apiBase) {
-          plan = await apiPost('/api/content-plan', {
+        const plan = await apiPostWithFallback(
+          '/api/content-plan',
+          {
             linkedin_url: linkedinUrl,
             linkedin_text: profileText,
             github_username: githubData?.username || '',
             github_data: githubData || {},
-          });
-        } else {
-          plan = await generateContentPlan(linkedinUrl, profileText, githubData);
-        }
+          },
+          () => generateContentPlan(linkedinUrl, profileText, githubData),
+        );
         renderContentPlan(plan);
         updateSession({ contentPlan: plan });
       } catch (err) {
@@ -1180,26 +1666,49 @@
         { label: 'GDG Hackathon Badge', style: 'gdg-badge' },
       ];
 
-      const results = [];
-      for (const s of styles) {
-        try {
-          let prompt;
-          if (apiBase) {
-            const res = await apiPost('/api/image-prompt', {
-              linkedin_text: profileText,
-              name, role, style: s.style,
-            });
-            prompt = res.prompt;
-          } else {
-            prompt = await generateImagePrompt(name, role, profileText, s.style);
-          }
-          results.push({ label: s.label, prompt });
-        } catch (err) {
-          results.push({ label: s.label, prompt: 'Prompt generation failed: ' + err.message, error: true });
-        }
-      }
+      const results = styles.map((s) => ({ label: s.label, prompt: 'Generating prompt…', status: 'prompting' }));
       renderImagePrompts(results);
-      updateSession({ imagePrompts: results });
+
+      for (let i = 0; i < styles.length; i++) {
+        const s = styles[i];
+        try {
+          const res = await apiPostWithFallback(
+            '/api/image-prompt',
+            { linkedin_text: profileText, name, role, style: s.style },
+            async () => ({ prompt: await generateImagePrompt(name, role, profileText, s.style) }),
+          );
+          results[i] = { ...results[i], prompt: res.prompt, status: 'generating' };
+          renderImagePrompts(results);
+
+          // Now actually generate the image with Nano Banana
+          try {
+            const img = await apiPostWithFallback(
+              '/api/generate-image',
+              { prompt: res.prompt },
+              async () => {
+                const r = await generateNanoBananaImage(res.prompt);
+                return { image_base64: r.imageBase64, mime_type: r.mimeType, text: r.text };
+              },
+            );
+            results[i] = {
+              ...results[i],
+              status: img.image_base64 ? 'ready' : 'text-only',
+              imageBase64: img.image_base64,
+              mimeType: img.mime_type || 'image/png',
+              imageText: img.text || null,
+            };
+          } catch (imgErr) {
+            console.warn('index.html: image generation failed for', s.label, imgErr);
+            results[i] = { ...results[i], status: 'image-failed', imageError: imgErr.message };
+          }
+        } catch (err) {
+          results[i] = { label: s.label, prompt: 'Prompt generation failed: ' + err.message, status: 'prompt-failed', error: true };
+        }
+        renderImagePrompts(results);
+      }
+      // Strip base64 image data before persisting — localStorage isn't sized for it.
+      const persistable = results.map(({ imageBase64, ...rest }) => rest);
+      updateSession({ imagePrompts: persistable });
     }
 
     // ── GitHub flow ──────────────────────────────────────────────────────
@@ -1235,6 +1744,22 @@
       document.getElementById('github-section').classList.remove('visible');
     };
 
+    function scoreTone(score) {
+      if (score >= 80) return 'var(--success)';
+      if (score >= 50) return 'var(--warn)';
+      return 'var(--danger)';
+    }
+
+    function scoreStatusSvg(score) {
+      if (score >= 80) {
+        return '<svg class="status-icon status-good icon-svg" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/><circle cx="12" cy="12" r="10"/></svg>';
+      }
+      if (score >= 50) {
+        return '<svg class="status-icon status-mid icon-svg" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/><circle cx="12" cy="12" r="10"/></svg>';
+      }
+      return '<svg class="status-icon status-low icon-svg" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/><circle cx="12" cy="12" r="10"/></svg>';
+    }
+
     // ── Render: Review ───────────────────────────────────────────────────
     function renderReview(review) {
       document.getElementById('review-score-pill').textContent = (review.overall_score || 0) + '/100';
@@ -1250,7 +1775,7 @@
       const offset = circumference - (score / 100) * circumference;
       const circle = document.getElementById('score-circle');
       circle.style.strokeDashoffset = offset;
-      circle.style.stroke = score >= 80 ? '#34A853' : score >= 50 ? '#4285F4' : '#EA4335';
+      circle.style.stroke = scoreTone(score);
 
       // Top improvements
       const fixes = review.top_improvements || [];
@@ -1272,8 +1797,8 @@
         const s = sections[key];
         if (!s) return;
         const score = s.score || 0;
-        const color = score >= 80 ? '#34A853' : score >= 50 ? '#FBBC05' : '#EA4335';
-        const icon = score >= 80 ? '✅' : score >= 50 ? '⚠️' : '🔴';
+        const tone = scoreTone(score);
+        const icon = scoreStatusSvg(score);
         const label = key.replace(/_/g, ' ');
 
         const item = document.createElement('div');
@@ -1282,8 +1807,8 @@
           <div class="profile-item-header" onclick="this.nextElementSibling.classList.toggle('open')">
             <span class="score-status">${icon}</span>
             <span class="item-name">${label}</span>
-            <div class="score-bar"><div class="score-bar-fill" style="width:${score}%;background:${color};"></div></div>
-            <span class="score-val" style="color:${color};">${score}</span>
+            <div class="score-bar"><div class="score-bar-fill" style="width:${score}%;background:${tone};"></div></div>
+            <span class="score-val" style="color:${tone};">${score}</span>
           </div>
           <div class="item-body">
             <p class="item-feedback">${s.feedback || ''}</p>
@@ -1318,31 +1843,54 @@
           <div class="post-footer">
             ${(p.hashtags || []).map(h => `<span class="hashtag-chip">${h}</span>`).join('')}
             <button class="copy-btn" onclick="copyPost(this, ${JSON.stringify(p.body + '\n\n' + (p.hashtags || []).join(' ')).replace(/"/g, '&quot;')})">
-              Copy post ↗
+              Copy
+            </button>
+            <button class="copy-btn copy-btn-primary" onclick="openInLinkedIn(this, ${JSON.stringify(p.body + '\n\n' + (p.hashtags || []).join(' ')).replace(/"/g, '&quot;')})">
+              Open in LinkedIn
             </button>
           </div>
+          <div class="post-hint">Draft — paste into LinkedIn to publish</div>
         `;
         postsEl.appendChild(card);
       });
     }
 
-    // ── Render: Image Prompts ────────────────────────────────────────────
-    function renderImagePrompts(prompts) {
+    // ── Render: AI Images (Nano Banana) ──────────────────────────────────
+    function renderImagePrompts(items) {
       const grid = document.getElementById('image-prompts-grid');
       grid.innerHTML = '';
-      prompts.forEach(({ label, prompt, error }) => {
+      items.forEach((item, index) => {
+        const { label, prompt, imageBase64, mimeType, status, imageError } = item;
         const card = document.createElement('div');
         card.className = 'image-card';
+        card.dataset.index = String(index);
+
+        let visual;
+        if (imageBase64) {
+          const src = `data:${mimeType || 'image/png'};base64,${imageBase64}`;
+          visual = `<img class="image-output" src="${src}" alt="${escapeAttr(label)}" />`;
+        } else {
+          const isError = status === 'image-failed' || status === 'prompt-failed';
+          const statusLabel =
+            status === 'prompting' ? 'Writing prompt…' :
+            status === 'generating' ? 'Painting with Nano Banana…' :
+            status === 'text-only' ? 'Model returned text only' :
+            isError ? (imageError || 'Failed') :
+            'Queued';
+          visual = `
+            <div class="image-placeholder ${isError ? 'image-error' : ''}">
+              ${isError ? '' : '<div class="image-spinner"></div>'}
+              <span class="image-status">${statusLabel}</span>
+              <span class="image-label">${escapeHtml(label)}</span>
+            </div>`;
+        }
+
+        const promptText = (prompt || '').toString();
         card.innerHTML = `
-          <div class="image-placeholder" style="background:${error ? 'rgba(234,67,53,0.05)' : 'var(--surface)'};">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
-              <polyline points="21 15 16 10 5 21"/>
-            </svg>
-            <span style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);">${label}</span>
-          </div>
-          <div class="prompt-text">${prompt}</div>
+          ${visual}
+          <div class="prompt-text">${escapeHtml(promptText)}</div>
           <div class="image-actions">
+            ${imageBase64 ? `<button class="img-copy-btn" onclick="downloadImage(this, ${index})">Download PNG</button>` : ''}
             <button class="img-copy-btn" onclick="copyPrompt(this, this.closest('.image-card').querySelector('.prompt-text').textContent)">
               Copy prompt
             </button>
@@ -1350,22 +1898,53 @@
         `;
         grid.appendChild(card);
       });
+      window.__imageCards = items;
     }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function escapeAttr(s) { return escapeHtml(s); }
+
+    window.downloadImage = function (btn, index) {
+      const item = (window.__imageCards || [])[index];
+      if (!item?.imageBase64) return;
+      const a = document.createElement('a');
+      a.href = `data:${item.mimeType || 'image/png'};base64,${item.imageBase64}`;
+      a.download = (item.label || 'nano-banana').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      btn.textContent = 'Downloaded';
+      setTimeout(() => { btn.textContent = 'Download PNG'; }, 2000);
+    };
 
     // ── Utilities ────────────────────────────────────────────────────────
     window.copyPost = async function (btn, text) {
       try {
         await navigator.clipboard.writeText(text);
-        btn.textContent = '✅ Copied!';
+        btn.textContent = 'Copied!';
         btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = 'Copy post ↗'; btn.classList.remove('copied'); }, 2000);
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
       } catch { btn.textContent = 'Failed'; }
+    };
+
+    window.openInLinkedIn = async function (btn, text) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (e) {
+        console.warn('index.html: clipboard write failed:', e);
+      }
+      btn.textContent = 'Copied — opening LinkedIn…';
+      btn.classList.add('copied');
+      window.open('https://www.linkedin.com/feed/?shareActive=true', '_blank', 'noopener');
+      setTimeout(() => { btn.textContent = 'Open in LinkedIn'; btn.classList.remove('copied'); }, 2500);
     };
 
     window.copyPrompt = async function (btn, text) {
       try {
         await navigator.clipboard.writeText(text.trim());
-        btn.textContent = '✅ Copied!';
+        btn.textContent = 'Copied!';
         setTimeout(() => { btn.textContent = 'Copy prompt'; }, 2000);
       } catch {}
     };
